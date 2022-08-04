@@ -2,6 +2,7 @@ const express = require('express');
 const fs = require('fs').promises;
 const bodyParser = require('body-parser');
 const crypto = require('crypto');
+const { isValidEmail, isValidPassword } = require('./validations');
 
 const app = express();
 app.use(bodyParser.json());
@@ -32,7 +33,7 @@ app.get('/talker/:id', async (req, res) => {
     return res.status(200).json(selectedTalker);
 });
 
-app.post('/login', (req, res) => {
+app.post('/login', isValidEmail, isValidPassword, (req, res) => {
   const { email, password } = req.body;
 
   if (email && password) {
