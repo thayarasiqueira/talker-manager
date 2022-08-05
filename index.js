@@ -2,7 +2,16 @@ const express = require('express');
 const fs = require('fs').promises;
 const bodyParser = require('body-parser');
 const crypto = require('crypto');
-const { isValidEmail, isValidPassword } = require('./validations');
+const { 
+  isValidEmail, 
+  isValidPassword,
+  isValidToken,
+  isValidName,
+  isValidAge,
+  isValidTalk,
+  isValidWatched,
+  isValidRate,
+} = require('./validations');
 
 const app = express();
 app.use(bodyParser.json());
@@ -40,6 +49,20 @@ app.post('/login', isValidEmail, isValidPassword, (req, res) => {
     const token = crypto.randomBytes(8).toString('hex');
     return res.status(200).json({ token });
   }
+});
+
+app.post('/talker', isValidToken, isValidName, isValidAge, isValidTalk,
+isValidWatched, isValidRate, async (req, res) => {
+  const result = await fs.readFile('./talker.json', 'utf-8');
+  const talkers = JSON.parse(result);
+  const newTalker = req.body;
+  const addTalker = {
+    id: talkers.length + 1,
+    ...newTalker,
+  };
+  talkers.push(addTalker);
+  await fs.writeFile('./talker.json', JSON.stringify(talkers));
+  return res.status(201).json(addTalker);
 });
 
 app.listen(PORT, () => {
