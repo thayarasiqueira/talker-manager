@@ -12,6 +12,7 @@ const {
   isValidWatched,
   isValidRate,
 } = require('./validations');
+const getTalkers = require('./middlewares');
 
 const app = express();
 app.use(bodyParser.json());
@@ -25,15 +26,13 @@ app.get('/', (_request, response) => {
 });
 
 app.get('/talker', async (_req, res) => {
-  const result = await fs.readFile('./talker.json', 'utf-8');
-  const talkers = JSON.parse(result);
+  const talkers = await getTalkers();
 
   return res.status(200).json(talkers);
 });
 
 app.get('/talker/:id', async (req, res) => {
-    const result = await fs.readFile('./talker.json', 'utf-8');
-    const talkers = JSON.parse(result);
+    const talkers = await getTalkers();
     const { id } = req.params;
     const selectedTalker = talkers.find((e) => e.id === +id);
     if (!selectedTalker) {
@@ -53,8 +52,7 @@ app.post('/login', isValidEmail, isValidPassword, (req, res) => {
 
 app.post('/talker', isValidToken, isValidName, isValidAge, isValidTalk,
 isValidWatched, isValidRate, async (req, res) => {
-  const result = await fs.readFile('./talker.json', 'utf-8');
-  const talkers = JSON.parse(result);
+  const talkers = await getTalkers();
   const newTalker = req.body;
   const addTalker = {
     id: talkers.length + 1,
@@ -63,6 +61,27 @@ isValidWatched, isValidRate, async (req, res) => {
   talkers.push(addTalker);
   await fs.writeFile('./talker.json', JSON.stringify(talkers));
   return res.status(201).json(addTalker);
+});
+
+app.put('/talker/:id', isValidToken, isValidName, isValidAge, isValidTalk,
+isValidWatched, isValidRate, async (req, res) => {
+  const talkers = await getTalkers();
+  const editTalker = req.body;
+  const { id } = req.params;
+  let editedTalker = {};
+  const editedTalkers = talkers.map((talker) => {
+    if (talker.id === +id) {
+      editedTalker = {
+        id: talker.id,
+        ...editTalker,
+      };
+      return editedTalker;
+    }
+    return talker;
+  });
+  await fs.writeFile('./talker.json', JSON.stringify(editedTalkers));
+
+  return res.status(200).json(editedTalker);
 });
 
 app.listen(PORT, () => {

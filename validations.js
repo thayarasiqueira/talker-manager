@@ -1,3 +1,4 @@
+  // validations email and password
   const isValidEmail = (req, res, next) => {
     const { email } = req.body;
 
@@ -22,6 +23,7 @@
     next();
   };
 
+  // validations to add a new talker
   const isValidToken = (req, res, next) => {
     const { authorization } = req.headers;
     if (!authorization) {
@@ -80,7 +82,7 @@
   const isValidRate = (req, res, next) => {
     const { talk } = req.body;
     const { rate } = talk;
-    if (!rate) {
+    if (rate === undefined) {
       return res.status(400).json({ message: 'O campo "rate" é obrigatório' });
     }
     if (!Number.isInteger(rate) || rate < 1 || rate > 5) {
@@ -89,6 +91,8 @@
     }
     next();
   };
+
+  // validations 
 
   module.exports = {
     isValidEmail,
