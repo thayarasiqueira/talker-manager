@@ -25,6 +25,16 @@ app.get('/', (_request, response) => {
   response.status(HTTP_OK_STATUS).send();
 });
 
+app.get('/talker/search', isValidToken, async (req, res) => {
+  const { q } = req.query;
+  const talkers = await getTalkers();
+  const selectedTalkers = talkers.filter((e) => e.name.includes(q));
+  if (!q) return res.status(HTTP_OK_STATUS).json(talkers);
+  if (!selectedTalkers) return res.status(HTTP_OK_STATUS).json([]);
+  await fs.writeFile('./talker.json', JSON.stringify(selectedTalkers));
+  return res.status(HTTP_OK_STATUS).json(selectedTalkers);
+});
+
 app.get('/talker', async (_req, res) => {
   const talkers = await getTalkers();
 
@@ -85,11 +95,11 @@ isValidWatched, isValidRate, async (req, res) => {
 });
 
   app.delete('/talker/:id', isValidToken, async (req, res) => {
-    const { id: idToDelete } = req.params;
+    const { id } = req.params;
     const talkers = await getTalkers();
-    const deleted = talkers.filter(({ id }) => id !== +idToDelete);
-    await fs.writeFile('./talker.json', JSON.stringify(deleted));
-    return res.status(204).end;
+    const removedList = talkers.filter(({ id: tId }) => tId !== +id);
+    await fs.writeFile('./talker.json', JSON.stringify(removedList));
+    return res.status(204).end();
   });
 
 app.listen(PORT, () => {

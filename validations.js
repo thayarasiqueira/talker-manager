@@ -1,4 +1,3 @@
-  // validations email and password
   const isValidEmail = (req, res, next) => {
     const { email } = req.body;
 
@@ -23,7 +22,6 @@
     next();
   };
 
-  // validations to add a new talker
   const isValidToken = (req, res, next) => {
     const { authorization } = req.headers;
     if (!authorization) {
@@ -91,8 +89,6 @@
     }
     next();
   };
-
-  // validations 
 
   module.exports = {
     isValidEmail,
