@@ -28,7 +28,7 @@ app.get('/', (_request, response) => {
 app.get('/talker', async (_req, res) => {
   const talkers = await getTalkers();
 
-  return res.status(200).json(talkers);
+  return res.status(HTTP_OK_STATUS).json(talkers);
 });
 
 app.get('/talker/:id', async (req, res) => {
@@ -38,7 +38,7 @@ app.get('/talker/:id', async (req, res) => {
     if (!selectedTalker) {
       return res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
     }
-    return res.status(200).json(selectedTalker);
+    return res.status(HTTP_OK_STATUS).json(selectedTalker);
 });
 
 app.post('/login', isValidEmail, isValidPassword, (req, res) => {
@@ -46,7 +46,7 @@ app.post('/login', isValidEmail, isValidPassword, (req, res) => {
 
   if (email && password) {
     const token = crypto.randomBytes(8).toString('hex');
-    return res.status(200).json({ token });
+    return res.status(HTTP_OK_STATUS).json({ token });
   }
 });
 
@@ -81,8 +81,16 @@ isValidWatched, isValidRate, async (req, res) => {
   });
   await fs.writeFile('./talker.json', JSON.stringify(editedTalkers));
 
-  return res.status(200).json(editedTalker);
+  return res.status(HTTP_OK_STATUS).json(editedTalker);
 });
+
+  app.delete('/talker/:id', isValidToken, async (req, res) => {
+    const { id: idToDelete } = req.params;
+    const talkers = await getTalkers();
+    const deleted = talkers.filter(({ id }) => id !== +idToDelete);
+    await fs.writeFile('./talker.json', JSON.stringify(deleted));
+    return res.status(204).end;
+  });
 
 app.listen(PORT, () => {
   console.log('Online');
